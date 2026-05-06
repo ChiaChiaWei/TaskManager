@@ -8,7 +8,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 // registrate DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=taskmanager.db"));
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+    if (!string.IsNullOrEmpty(connectionString))
+    {
+        options.UseSqlite(connectionString);
+    }
+    else
+    {
+        options.UseSqlite("Data Source=taskmanager.db");
+    }
+});
 
 // registrate DI
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
