@@ -48,3 +48,6 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 
 app.Run();
+
+// Make the implicit Program class public so it can be accessed by integration tests
+public partial class Program { }
