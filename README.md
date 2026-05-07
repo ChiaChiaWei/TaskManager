@@ -15,8 +15,8 @@ src/
 └── TaskManager.Infrastructure/ # Data access (DbContext, Repositories)
 
 tests/
-├── TaskManager.UnitTests/      # Unit tests (xUnit + Moq)
-└── TaskManager.IntegrationTests/
+├── TaskManager.UnitTests/        # Unit tests (xUnit + Moq)
+└── TaskManager.IntegrationTests/ # Integration tests (WebApplicationFactory)
 ```
 
 ## 🛠️ Tech Stack
@@ -28,6 +28,7 @@ tests/
 | Database (Local) | SQLite |
 | Database (Production) | Azure SQL Database |
 | Unit Testing | xUnit + Moq + FluentAssertions |
+| Integration Testing | WebApplicationFactory + InMemory Database + FluentAssertions |
 | CI/CD | GitHub Actions |
 | Cloud | Azure App Service |
 
@@ -69,6 +70,13 @@ dotnet run --project src/TaskManager.API
 # Open Swagger UI
 https://localhost:{port}/swagger
 ```
+
+## 🧪 Testing
+
+| Type | Project | Count |
+|------|---------|-------|
+| Unit Tests | TaskManager.UnitTests | 8 tests |
+| Integration Tests | TaskManager.IntegrationTests | 8 tests |
 
 ### Run Tests
 ```bash
