@@ -1,5 +1,6 @@
 ﻿using Moq;
 using FluentAssertions;
+using TaskManager.Core.Exceptions;
 using TaskManager.Core.Entities;
 using TaskManager.Core.Interfaces;
 using TaskManager.Core.Services;
@@ -54,16 +55,16 @@ public class TaskServiceTests
     }
 
     [Fact]
-    public async Task GetTaskByIdAsync_WhenTaskNotExists_ShouldReturnNull() 
+    public async Task GetTaskByIdAsync_WhenTaskNotFound_ShouldThrowNotFoundException() 
     {
         // Arrange
         _mockRepo.Setup(r => r.GetByIdAsync(99)).ReturnsAsync((TaskItem?)null);
 
         // Act
-        var result = await _taskService.GetTaskByIdAsync(99);
+        var act = async() => await _taskService.GetTaskByIdAsync(99);
 
         // Assert
-        result.Should().BeNull();
+        await act.Should().ThrowAsync<NotFoundException>();
     }
     #endregion
 
@@ -90,56 +91,62 @@ public class TaskServiceTests
     {
         // Arrange
         var task = new TaskItem { Id = 1, Title = "Task 1", IsCompleted = true };
-        _mockRepo.Setup(r => r.UpdateAsync(It.IsAny<TaskItem>())).ReturnsAsync((TaskItem t) => t);
+        _mockRepo.Setup(r => r.GetByIdAsync(1))
+             .ReturnsAsync(task);
+
+        _mockRepo.Setup(r => r.UpdateAsync(It.IsAny<TaskItem>()))
+            .ReturnsAsync((TaskItem t) => t);
 
         // Act
         var result = await _taskService.UpdateTaskAsync(task);
 
         // Assert
         result.Should().NotBeNull();
-        result!.CompletedAt.Should().NotBeNull();
+        result.CompletedAt.Should().NotBeNull();
     }
 
     [Fact]
-    public async Task UpdateTaskAsync_WhenTaskNotFound_ShouldReturnNull() 
+    public async Task UpdateTaskAsync_WhenTaskNotFound_ShouldThrowNotFoundException() 
     {
         // Arrange
         var task = new TaskItem { Id = 99, Title = "Not Exist" };
         _mockRepo.Setup(r => r.UpdateAsync(task)).ReturnsAsync((TaskItem?)null);
         
         // Act
-        var result = await _taskService.UpdateTaskAsync(task);
+        var act = async() => await _taskService.UpdateTaskAsync(task);
         
         // Assert
-        result.Should().BeNull();
+        await act.Should().ThrowAsync<NotFoundException>();
     }
     #endregion
 
     #region DeleteTaskAsync
     [Fact]
-    public async Task DeleteTaskAsync_WhenTaskExists_ShouldReturnTrue() 
+    public async Task DeleteTaskAsync_WhenTaskExists_ShouldComplete() 
     {
         // Arrange
+        var task = new TaskItem { Id = 1, Title = "Task 1" };
+        _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(task);
         _mockRepo.Setup(r => r.DeleteAsync(1)).ReturnsAsync(true);
         
         // Act
-        var result = await _taskService.DeleteTaskAsync(1);
+        var act = async() => await _taskService.DeleteTaskAsync(1);
         
         // Assert
-        result.Should().BeTrue();
+        await act.Should().NotThrowAsync();
     }
 
     [Fact]
-    public async Task DeleteTaskAsync_WhenTaskNotExists_ShouldReturnFalse() 
+    public async Task DeleteTaskAsync_WhenTaskNotFound_ShouldThrowNotFoundException() 
     {
         // Arrange
         _mockRepo.Setup(r => r.DeleteAsync(99)).ReturnsAsync(false);
         
         // Act
-        var result = await _taskService.DeleteTaskAsync(99);
+        var act = async() => await _taskService.DeleteTaskAsync(99);
         
         // Assert
-        result.Should().BeFalse();
+        await act.Should().ThrowAsync<NotFoundException>();
     }
     #endregion
 }

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TaskManager.API.Middleware;
 using TaskManager.Core.Interfaces;
 using TaskManager.Core.Services;
 using TaskManager.Infrastructure.Data;
@@ -39,12 +40,15 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.UseHttpsRedirection();
 app.MapControllers();
 
 app.Run();
