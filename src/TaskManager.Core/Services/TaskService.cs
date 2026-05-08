@@ -1,4 +1,5 @@
 ﻿using TaskManager.Core.Entities;
+using TaskManager.Core.Exceptions;
 using TaskManager.Core.Interfaces;
 
 namespace TaskManager.Core.Services;
@@ -15,20 +16,44 @@ public class TaskService : ITaskService
     public Task<IEnumerable<TaskItem>> GetAllTasksAsync() =>
         _repository.GetAllAsync();
 
-    public Task<TaskItem?> GetTaskByIdAsync(int id) =>
-        _repository.GetByIdAsync(id);
+    public async Task<TaskItem> GetTaskByIdAsync(int id) 
+    {
+        var task = await _repository.GetByIdAsync(id);
+        if (task == null)
+            throw new NotFoundException("Task", id);
+        return task;
+    }
 
-    public Task<TaskItem> CreateTaskAsync(TaskItem task) =>
-        _repository.CreateAsync(task);
+    public async Task<TaskItem> CreateTaskAsync(TaskItem task) 
+    {
+        if (string.IsNullOrEmpty(task.Title))
+            throw new ValidationException("Title is required.");
+        return await _repository.CreateAsync(task);
+    }
 
     public async Task<TaskItem?> UpdateTaskAsync(TaskItem task)
     {
+        if (string.IsNullOrEmpty(task.Title))
+            throw new ValidationException("Title is required.");
+
+        var existingTask = await _repository.GetByIdAsync(task.Id);
+        if (existingTask == null)
+            throw new NotFoundException("Task", task.Id);
+
         if (task.IsCompleted && task.CompletedAt == null)
             task.CompletedAt = DateTime.UtcNow;
 
-        return await _repository.UpdateAsync(task);
+        return await _repository.UpdateAsync(task) 
+            ?? throw new NotFoundException("Task", task.Id);
     }
 
-    public Task<bool> DeleteTaskAsync(int id) =>
-        _repository.DeleteAsync(id);
+    public async Task DeleteTaskAsync(int id) 
+    { 
+        var existingTask = await _repository.GetByIdAsync(id);
+        if (existingTask==null)
+            throw new NotFoundException("Task", id);
+
+        await _repository.DeleteAsync(id); 
+    }
+        
 }

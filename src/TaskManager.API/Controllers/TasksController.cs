@@ -20,11 +20,8 @@ public class TasksController:ControllerBase
         Ok(await _taskService.GetAllTasksAsync());
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
-    {
-        var task = await _taskService.GetTaskByIdAsync(id);
-        return task == null ? NotFound() : Ok(task);
-    }
+    public async Task<IActionResult> GetById(int id) =>
+        Ok(await _taskService.GetTaskByIdAsync(id));
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] TaskItem task)
@@ -37,14 +34,13 @@ public class TasksController:ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] TaskItem task)
     {
         task.Id = id;
-        var updated = await _taskService.UpdateTaskAsync(task);
-        return updated == null ? NotFound() : Ok(updated);
+        return Ok(await _taskService.UpdateTaskAsync(task));
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var deleted = await _taskService.DeleteTaskAsync(id);
-        return deleted ? NoContent() : NotFound();
+        await _taskService.DeleteTaskAsync(id);
+        return NoContent();
     }
 }
