@@ -42,6 +42,24 @@ tests/
 | PUT | /api/tasks/{id} | Update a task |
 | DELETE | /api/tasks/{id} | Delete a task |
 
+## 🚨 Error Handling
+
+All errors return a consistent JSON format:
+
+```json
+{
+  "status": 404,
+  "message": "Task with id 99 was not found",
+  "timestamp": "2026-05-08T10:00:00Z"
+}
+```
+
+| Status Code | Situation |
+|-------------|-----------|
+| 400 | Validation error (e.g. missing title) |
+| 404 | Resource not found |
+| 500 | Unexpected server error |
+
 ## ⚙️ CI/CD Pipeline
 
 ```
